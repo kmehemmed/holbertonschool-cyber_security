@@ -1,7 +1,30 @@
 #!/usr/bin/env bash
-# Worker script that writes to /tmp/my_process indefinitely
+# manage_my_process skriptini idarə edən ana skript
 
-while true; do
-    echo "I am alive!" >> /tmp/my_process
-    sleep 2
-done
+ACTION=$1
+PID_FILE="/tmp/my_process.pid"
+
+case "$ACTION" in
+    start)
+        ./manage_my_process &
+        echo $! > "$PID_FILE"
+        echo "manage_my_process started"
+        ;;
+    stop)
+        kill "$(cat "$PID_FILE")"
+        rm "$PID_FILE"
+        echo "manage_my_process stopped"
+        ;;
+    restart)
+        # Əvvəl dayandırırıq
+        kill "$(cat "$PID_FILE")"
+        rm "$PID_FILE"
+        # Sonra yenidən başladırıq
+        ./manage_my_process &
+        echo $! > "$PID_FILE"
+        echo "manage_my_process restarted"
+        ;;
+    *)
+        echo "Usage: manage_my_process {start|stop|restart}"
+        ;;
+esac
